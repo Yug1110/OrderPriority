@@ -88,7 +88,7 @@
             <div><h5>Say hello</h5><ul>
               <li><a href="https://wa.me/${S.whatsapp}" target="_blank" rel="noopener">WhatsApp</a></li>
               <li><a href="mailto:${S.email}">${esc(S.email)}</a></li>
-              <li><a href="${S.instagram}" target="_blank" rel="noopener">Instagram</a></li>
+              ${S.instagram ? `<li><a href="${S.instagram}" target="_blank" rel="noopener">Instagram</a></li>` : ""}
             </ul></div>
           </div>
           <div class="footer-bottom"><span>© ${new Date().getFullYear()} ${esc(S.legalName.startsWith("[") ? S.name : S.legalName)}. Made with love for little ones.</span><span class="footer-legal"><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="returns.html">Refunds</a></span></div>

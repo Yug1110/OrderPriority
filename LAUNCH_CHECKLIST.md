@@ -2,7 +2,7 @@
 
 This file lists everything left to do before a public launch and before pitching investors. Tick items off as they're done, and keep it current.
 
-Live site: https://order-priority.vercel.app (the old GitHub Pages address, `yug1110.github.io`, carries a Google "unsafe" flag from March 2026, so don't share it).
+Live site: https://order-priority.vercel.app. GitHub Pages was turned off on 2026-09-24 because `yug1110.github.io` carries a Google "unsafe" flag from March 2026; don't reuse that address.
 
 Legend: ⬜ to do · 🔄 in progress · ✅ done · ⏸ deferred by owner (to be picked up later)
 
@@ -14,20 +14,20 @@ All of these go in `config.js` except prices, which live in `data/products.js`.
 
 | Status | Item | Where it shows |
 |---|---|---|
-| ⬜ | Brand name | Everywhere, including link previews (`assets/brand/og.jpg` must be re-generated) |
-| ⬜ | Tagline | Footer, link preview |
-| ⬜ | WhatsApp number for orders | Every "Order on WhatsApp" button and the checkout |
-| ⬜ | Phone number to display | Contact and policy pages |
-| ⬜ | Support email | Footer, Contact, policies |
-| ⬜ | Instagram link | Footer |
-| ⬜ | Registered business name | Contact, Terms, Privacy, footer © |
-| ⬜ | Registered business address | Contact, Terms, Privacy |
-| ⬜ | Grievance officer name | Contact, Terms, Privacy (legally required) |
-| ⬜ | GSTIN (optional) | Contact |
-| ⬜ | Selling price and MRP for all 16 products | Shop and product pages |
-| ⬜ | Shipping fee below the free-shipping amount (now ₹79) and the free-shipping amount (now ₹999) | Bag, shipping policy |
-| ⬜ | COD on or off, COD fee (now ₹49), minimum COD order (now ₹499) | Checkout, shipping policy |
-| ⬜ | Support hours (now Mon–Sat 10–7) | Contact |
+| ⬜ | Brand name (still the placeholder "Little Oat") | Everywhere, including link previews (`assets/brand/og.jpg` must be re-generated) |
+| ⬜ | Tagline (still the placeholder) | Footer, link preview |
+| ✅ | WhatsApp number for orders (+91 80764 49307) | Every "Order on WhatsApp" button and the checkout |
+| ✅ | Phone number to display (same as WhatsApp) | Contact and policy pages |
+| ✅ | Support email (yugayugarg5@gmail.com; switch to a domain email later) | Footer, Contact, policies |
+| ⬜ | Instagram link (account not created yet; the footer link stays hidden until it's set) | Footer |
+| ⬜ | Registered business name (no company yet; the owner will provide it) | Contact, Terms, Privacy, footer © |
+| ⬜ | Registered business address (owner will provide) | Contact, Terms, Privacy |
+| ⬜ | Grievance officer name (owner will provide) | Contact, Terms, Privacy (legally required) |
+| ⬜ | GSTIN (optional; owner will provide) | Contact |
+| ⬜ | Selling price and MRP for all 16 products (placeholders still live) | Shop and product pages |
+| ✅ | Free shipping from ₹999, otherwise ₹79 (confirmed) | Bag, shipping policy |
+| ✅ | COD on, ₹49 fee, ₹499 minimum order (confirmed) | Checkout, shipping policy |
+| ✅ | Support hours Mon–Sat, 10 am – 7 pm (confirmed) | Contact |
 | ⬜ | Real logo (currently a placeholder moon icon) | Header, favicon, link preview |
 
 ## 2. Deferred by the owner (remind until marked done)
@@ -103,4 +103,5 @@ Investors will ask for numbers, so the analytics and order log in sections 3 and
 
 - 2026-09-24: Storefront built and deployed (home, shop, product, bag, WhatsApp checkout); photos optimised from 1.3 GB to 17 MB.
 - 2026-09-24: Moved hosting to Vercel after the Google Safe Browsing flag on the github.io address.
+- 2026-09-24: Set WhatsApp/phone, support email, hours, shipping and COD rules; Instagram link hidden until created; GitHub Pages turned off.
 - 2026-09-24: Removed the Disney-character products. Added policy pages, size guide, payment choice with COD and shipping fees, order IDs, link previews, sitemap and caching headers.
