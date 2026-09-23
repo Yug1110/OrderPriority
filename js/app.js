@@ -366,7 +366,7 @@
             <button class="btn btn-primary" id="add">Add to bag</button>
           </div>
           <button class="btn btn-whatsapp btn-block" id="wa">${ICON.wa} Order on WhatsApp</button>
-          <div class="mini-trust"><div><b>🌿</b>Soft cotton</div><div><b>🚚</b>Fast delivery</div><div><b>↺</b>Easy exchange</div></div>
+          <div class="mini-trust"><div><b>🌿</b>Gentle fabrics</div><div><b>🚚</b>Fast delivery</div><div><b>↺</b>Easy exchange</div></div>
           <div class="perks">
             <details open><summary>Description</summary><p>${esc(p.description)}</p></details>
             <details><summary>Size guide</summary><ul><li>0–3M: up to 6 kg · 62 cm</li><li>3–6M: 6–8 kg · 68 cm</li><li>6–12M: 8–10 kg · 80 cm</li><li>12–18M: 10–11 kg · 86 cm</li><li>18–24M: 11–13 kg · 92 cm</li></ul><p><a href="size-guide.html" style="text-decoration:underline">Full size guide & how to measure</a></p></details>
@@ -417,8 +417,8 @@
 
   // ---------- boot ----------
   chrome();
-  // Policy / info pages: fill <span data-s="key"> with values from config.js.
-  function info() {
+  // Fill <span data-s="key"> and <a data-href="key"> with values from config.js (any page).
+  function fillConfig() {
     const val = (k) => {
       if (k === "money.freeShippingAbove") return money(S.freeShippingAbove);
       if (k === "money.shippingFee") return money(S.shippingFee);
@@ -434,7 +434,9 @@
     $$("[data-cod-only]").forEach((el) => { if (!S.cod.enabled) el.remove(); });
   }
 
+  const info = () => {};
   const pages = { home, shop, product, info };
   (pages[document.body.dataset.page] || (() => {}))();
+  fillConfig();
   reveal();
 })();

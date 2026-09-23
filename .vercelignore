@@ -1,0 +1,4 @@
+# Internal files: keep them in the repo but off the live site
+*.md
+docs/
+scripts/
