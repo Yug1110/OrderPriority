@@ -1,6 +1,5 @@
-// Store settings — edit these, commit, and the live site updates.
-// Values marked TODO are placeholders that must be replaced before launch
-// (see LAUNCH_CHECKLIST.md).
+// Fallback store settings, used only when the admin database can't be
+// reached. Once the admin is set up, edit settings in /admin → Settings.
 window.STORE = {
   name: "Wynoak",
   tagline: "Grown to last.",
@@ -20,6 +19,7 @@ window.STORE = {
   gstin: "", // optional; leave empty if not registered
   grievanceOfficer: "[Name]", // TODO
 
+  supportHours: "Mon – Sat, 10 am – 7 pm IST",
   currency: "₹",
   sizes: ["0–3M", "3–6M", "6–12M", "12–18M", "18–24M"],
 

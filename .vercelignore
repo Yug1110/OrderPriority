@@ -2,3 +2,5 @@
 *.md
 docs/
 scripts/
+supabase/
+.env*

@@ -1,6 +1,6 @@
 # Admin dashboard plan
 
-**Status:** plan only. The owner has marked it secondary; nothing is built yet.
+**Status (2026-09-24): ✅ built and tested (option C, Supabase custom admin).** What's left is the owner's one-time setup in [SUPABASE_SETUP.md](SUPABASE_SETUP.md); see also [ADMIN_GUIDE.md](ADMIN_GUIDE.md). The options below are kept for reference.
 
 ## The problem today
 

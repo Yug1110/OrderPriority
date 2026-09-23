@@ -435,3 +435,20 @@ section { padding: 72px 0; }
 .prose a.btn-ghost { color: var(--walnut); }
 .prose a.btn-ghost:hover { color: var(--cream); }
 .prose a.btn-whatsapp { color: #fff; }
+
+/* ---------- Stock & loading states ---------- */
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.size.sold { opacity: .45; text-decoration: line-through; cursor: not-allowed; background: var(--cream-2); }
+.size.sold:hover { border-color: var(--line); }
+.swatch.sold { position: relative; opacity: .55; }
+.swatch.sold::after { content: ""; position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1.5px; background: var(--walnut); transform: rotate(45deg); }
+.card-badge.soldout { background: var(--walnut); color: var(--cream); }
+.card.is-sold .card-media img { filter: grayscale(.35); opacity: .8; }
+.low-stock { margin-top: 10px; font-size: 13px; font-weight: 800; color: var(--terracotta); min-height: 1em; }
+.btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.skeleton .card-media { background: linear-gradient(100deg, var(--oat) 30%, var(--cream-2) 50%, var(--oat) 70%); background-size: 300% 100%; animation: shimmer 1.4s ease-in-out infinite; }
+.sk-line { height: 14px; border-radius: 8px; background: var(--oat); margin: 14px 4px 0; width: 80%; }
+.sk-line.short { width: 40%; margin-top: 8px; }
+@keyframes shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+@media (prefers-reduced-motion: reduce) { .skeleton .card-media { animation: none; } }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }

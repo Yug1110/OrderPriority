@@ -1,55 +1,51 @@
-# Wynoak — baby clothing storefront
+# Wynoak — baby clothing storefront + admin
 
-A fast, static storefront for baby clothes (0–24 months). No backend: shoppers build a bag and send their order to you as a pre-filled WhatsApp message.
+Storefront for baby clothes (0–24 months) with an admin dashboard. Shoppers build a bag, the order is saved, and they're sent to WhatsApp to confirm. You manage products, photos, stock and orders at `/admin`.
 
-**Live:** https://order-priority.vercel.app (Vercel, auto-deploys from `main`)
+**Live:** https://order-priority.vercel.app · **Admin:** https://order-priority.vercel.app/admin/ (Vercel, auto-deploys from `main`)
 
-**What's left before launch:** see [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md).
+- **What's left before launch:** [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md)
+- **Using the admin:** [docs/ADMIN_GUIDE.md](docs/ADMIN_GUIDE.md)
+- **One-time admin setup (Supabase):** [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md)
+
+## How it fits together
+
+```
+Shoppers → static pages (index/shop/product/policies) → /api/catalog → Supabase (edge-cached 60 s)
+                                                      → /api/orders  → Supabase (prices recomputed on the server)
+Admins   → /admin/ (login) → Supabase directly, protected by row-level security (admins table)
+Photos uploaded in the admin → Supabase Storage "media" bucket → served at /media/* via a Vercel rewrite
+```
+
+If the database isn't configured or reachable, the shop falls back to the built-in snapshot (`config.js`, `data/products.js`, `data/images.js`) and WhatsApp-only orders, so it never goes down completely.
 
 ## Everyday edits
+Everything (products, photos, stock, prices, categories, store settings, team) is done in **/admin**. Code changes are only needed for page text and design, the link-preview image (`python3 scripts/make-share-image.py`) and the brand name in page `<title>`/`<meta>` tags.
 
-| What | Where |
-| --- | --- |
-| Brand name, WhatsApp number, email, Instagram, business details, shipping & COD fees, exchange days, sizes | `config.js` (policy pages read these values too) |
-| Product names, prices, MRP, descriptions, badges, colour order | `data/products.js` |
-| Colour names & swatch colours | `COLOURS` in `data/products.js` |
-| Look & feel (palette, fonts, spacing) | `css/styles.css` (tokens at the top) |
-
-Commit and push to `main` — Vercel redeploys in about a minute.
-
-After changing the brand name or tagline, also run `python3 scripts/make-share-image.py` (link-preview image) and replace `Wynoak` in the `<title>` and `<meta>` tags at the top of each `.html` file (crawlers don't run JavaScript).
-
-**Before going live, set your real WhatsApp number** in `config.js` (international format, digits only, e.g. `919876543210`).
-
-## Adding a product
-
-1. Put the photos in a new folder next to the other product folders, named by colour prefix + number (`pink1.png`, `pink2.png`, `b1.png`…).
-2. Add the folder to `FOLDERS` in `scripts/build-images.py` with a slug and a prefix → colour map.
-3. Run `python3 scripts/build-images.py ..` (needs `pip install pillow`). This writes optimised WebP images to `assets/products/<slug>/` and updates `data/images.js`.
-4. Add an entry to `PRODUCTS` in `data/products.js` with `id` = the slug.
-
-## Orders
-
-Checkout sends a WhatsApp message with an order ID (e.g. `WYN-260924-7K3F`), items, shipping, COD fee, total and payment choice. Confirm on WhatsApp, send a Razorpay payment link for prepaid orders, then book the shipment in Shiprocket.
-
-## Run locally
+## Development
 
 ```sh
-python3 -m http.server 8000
-# open http://localhost:8000
+npx supabase start                      # local database, auth, storage (needs Docker)
+npx supabase status -o env              # local keys → put URL/keys in .env.local
+ENV_FILE=.env.local node scripts/migrate-to-supabase.mjs you@example.com   # import catalogue + first admin
+node scripts/dev-server.mjs             # http://127.0.0.1:3000 (static site + api/*.js + /media proxy)
+docker exec -i supabase_db_wynoak psql -U postgres < supabase/tests/store_test.sql   # database tests
 ```
+
+Deploying the database schema to the live project: `npx supabase db push --db-url "$DATABASE_URL"`.
 
 ## Structure
 
 ```
-index.html  shop.html  product.html   pages (header, footer and bag are injected by js/app.js)
-contact / shipping / returns / terms / privacy / size-guide .html   policy pages, values filled from config.js
-js/app.js                             catalogue, bag (localStorage), WhatsApp checkout, page rendering
-css/styles.css                        all styles
-config.js  data/products.js           the things you edit
-data/images.js                        generated image manifest
-assets/products/                      generated WebP images (1200px + 560px)
-scripts/build-images.py               photo → WebP converter
-scripts/make-share-image.py           link-preview image + home-screen icon
-sitemap.xml  robots.txt  vercel.json  SEO + caching
+index.html shop.html product.html        storefront pages (header/footer/bag injected by js/app.js)
+contact/shipping/returns/terms/privacy/size-guide.html   policy pages, values filled from settings
+js/app.js  css/styles.css                storefront logic and styles
+admin/                                   admin app (index.html, admin.js, admin.css)
+api/                                     Vercel functions: catalog, orders, admin-invite, admin-config, keepalive
+supabase/migrations/                     database schema, security rules, stock trigger, stats
+supabase/tests/store_test.sql            database tests (rolled back after running)
+config.js data/                          fallback snapshot used if the database is unreachable
+assets/                                  optimised product photos and brand files
+scripts/                                 dev server, migration, photo converter, share-image generator
+docs/                                    setup, admin guide, policy review, legal plan
 ```
