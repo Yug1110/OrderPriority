@@ -110,26 +110,6 @@ window.PRODUCT_IMAGES = {
       "assets/products/striped-dungaree-set/default-5"
     ]
   },
-  "mickey-dungaree-set": {
-    "camel": [
-      "assets/products/mickey-dungaree-set/camel-1",
-      "assets/products/mickey-dungaree-set/camel-2",
-      "assets/products/mickey-dungaree-set/camel-3",
-      "assets/products/mickey-dungaree-set/camel-4"
-    ],
-    "grey": [
-      "assets/products/mickey-dungaree-set/grey-1",
-      "assets/products/mickey-dungaree-set/grey-2",
-      "assets/products/mickey-dungaree-set/grey-3",
-      "assets/products/mickey-dungaree-set/grey-4"
-    ],
-    "pink": [
-      "assets/products/mickey-dungaree-set/pink-1",
-      "assets/products/mickey-dungaree-set/pink-2",
-      "assets/products/mickey-dungaree-set/pink-3",
-      "assets/products/mickey-dungaree-set/pink-4"
-    ]
-  },
   "hooded-teddy-suit": {
     "cream": [
       "assets/products/hooded-teddy-suit/cream-1",
@@ -159,22 +139,6 @@ window.PRODUCT_IMAGES = {
       "assets/products/zip-fleece-suit/default-3",
       "assets/products/zip-fleece-suit/default-4",
       "assets/products/zip-fleece-suit/default-5"
-    ]
-  },
-  "duck-stripe-set": {
-    "blue": [
-      "assets/products/duck-stripe-set/blue-1",
-      "assets/products/duck-stripe-set/blue-2",
-      "assets/products/duck-stripe-set/blue-3",
-      "assets/products/duck-stripe-set/blue-4",
-      "assets/products/duck-stripe-set/blue-5"
-    ],
-    "peach": [
-      "assets/products/duck-stripe-set/peach-1",
-      "assets/products/duck-stripe-set/peach-2",
-      "assets/products/duck-stripe-set/peach-3",
-      "assets/products/duck-stripe-set/peach-4",
-      "assets/products/duck-stripe-set/peach-5"
     ]
   },
   "zebra-hooded-suit": {

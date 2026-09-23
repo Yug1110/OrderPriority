@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fbf6ef">
+  <title>Contact us · Little Oat</title>
+  <meta name="description" content="Get in touch about orders, sizes, exchanges or anything else.">
+  <link rel="canonical" href="https://order-priority.vercel.app/contact.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Little Oat">
+  <meta property="og:title" content="Contact us · Little Oat">
+  <meta property="og:description" content="Get in touch about orders, sizes, exchanges or anything else.">
+  <meta property="og:url" content="https://order-priority.vercel.app/contact.html">
+  <meta property="og:image" content="https://order-priority.vercel.app/assets/brand/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/brand/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="info">
+  <main class="wrap">
+    <div class="page-hero">
+      <span class="eyebrow">We're here to help</span>
+      <h1>Contact us</h1>
+    </div>
+    <article class="prose">
+      <p class="updated">Last updated: 24 September 2026</p>
+
+      <p>Have a question about sizing, an order or an exchange? Message us on WhatsApp for the quickest reply. We usually respond within a few hours, Monday to Saturday, 10 am – 7 pm.</p>
+      <p style="display:flex;gap:12px;flex-wrap:wrap;margin:22px 0">
+        <a class="btn btn-whatsapp" data-href="whatsapp" target="_blank" rel="noopener" >Chat on WhatsApp</a>
+        <a class="btn btn-ghost" data-href="email">Email us</a>
+      </p>
+      <div class="info-card"><dl>
+        <dt>Business name</dt><dd><span data-s="legalName"></span></dd>
+        <dt>Registered address</dt><dd><span data-s="address"></span></dd>
+        <dt>Phone / WhatsApp</dt><dd><span data-s="phoneDisplay"></span></dd>
+        <dt>Email</dt><dd><span data-s="email"></span></dd>
+        <div data-row style="display:contents"><dt>GSTIN</dt><dd><span data-s="gstin" data-optional></span></dd></div>
+        <dt>Support hours</dt><dd>Mon – Sat, 10 am – 7 pm IST</dd>
+      </dl></div>
+      <h2>Grievance officer</h2>
+      <p>In line with the Consumer Protection (E-Commerce) Rules, 2020, complaints can be sent to our grievance officer, <strong><span data-s="grievanceOfficer"></span></strong>, at <span data-s="email"></span> or <span data-s="phoneDisplay"></span>. We acknowledge every complaint within 48 hours and resolve it within one month.</p>
+    </article>
+  </main>
+  <script src="config.js"></script>
+  <script src="data/images.js"></script>
+  <script src="data/products.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://order-priority.vercel.app/sitemap.xml

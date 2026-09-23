@@ -392,3 +392,46 @@ section { padding: 72px 0; }
   .toolbar > * { min-width: 0; }
   .chip { flex: none; }
 }
+
+/* ---------- Checkout extras ---------- */
+.drawer-foot .sum { display: flex; justify-content: space-between; font-size: 14px; color: var(--walnut-2); margin-bottom: 4px; }
+.drawer-foot .row { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); }
+.pay-opt { display: flex !important; gap: 12px; align-items: flex-start; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--white); margin-bottom: 8px; cursor: pointer; font-weight: 500 !important; }
+.pay-opt:has(input:checked) { border-color: var(--walnut); }
+.pay-opt:has(input:disabled) { opacity: .55; cursor: not-allowed; }
+.pay-opt input { margin-top: 4px; accent-color: var(--walnut); }
+.pay-opt b { display: block; font-size: 14px; color: var(--walnut); }
+.pay-opt small { display: block; font-size: 12px; color: var(--walnut-2); }
+.footer-legal { display: flex; gap: 18px; }
+.footer-legal a:hover { color: var(--terracotta); }
+
+/* ---------- Policy / info pages ---------- */
+.prose { max-width: 760px; margin: 0 auto; padding-bottom: 20px; }
+.prose .updated { font-size: 13px; color: var(--walnut-2); margin-bottom: 28px; }
+.prose h2 { font-size: 26px; margin: 36px 0 12px; }
+.prose p, .prose li { color: var(--walnut-2); font-size: 16px; }
+.prose p { margin-bottom: 12px; }
+.prose ul { padding-left: 20px; margin: 0 0 12px; }
+.prose li { margin-bottom: 6px; }
+.prose a { color: var(--terracotta); text-decoration: underline; text-underline-offset: 3px; }
+.prose strong { color: var(--walnut); }
+.info-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px 26px; margin: 20px 0; }
+.info-card dl { display: grid; grid-template-columns: 180px 1fr; gap: 10px 20px; margin: 0; }
+.info-card dt { font-weight: 800; color: var(--walnut); font-size: 14px; }
+.info-card dd { margin: 0; color: var(--walnut-2); }
+.table { width: 100%; border-collapse: collapse; background: var(--white); border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--line); margin: 12px 0 20px; font-size: 15px; }
+.table th, .table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--line); }
+.table th { background: var(--oat); color: var(--walnut); font-weight: 800; }
+.table td { color: var(--walnut-2); }
+.table-scroll { overflow-x: auto; }
+@media (max-width: 600px) {
+  .info-card dl { grid-template-columns: 1fr; gap: 2px; }
+  .info-card dd { margin-bottom: 10px; }
+  .footer-legal { gap: 14px; }
+}
+.field .pay-opt input { width: auto; flex: none; padding: 0; }
+.field .pay-opt span { display: block; }
+.prose a.btn { text-decoration: none; }
+.prose a.btn-ghost { color: var(--walnut); }
+.prose a.btn-ghost:hover { color: var(--cream); }
+.prose a.btn-whatsapp { color: #fff; }

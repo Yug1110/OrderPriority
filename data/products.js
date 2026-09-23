@@ -48,11 +48,6 @@ window.PRODUCTS = [
     description: "A plush, fleece-lined hooded suit with a playful zebra print, built-in feet and fold-over mittens. Front zip for quick changes.",
   },
   {
-    id: "mickey-dungaree-set", name: "Mickey Dungaree Set with Cap", category: "dungarees",
-    price: 899, mrp: 1199, colours: ["camel", "grey", "pink"], badge: "New",
-    description: "Soft cotton dungarees over a crew-neck tee, finished with a matching ear cap. Adjustable straps with snap buttons.",
-  },
-  {
     id: "zip-bomber-jogger-set", name: "Zip Bomber & Jogger Set", category: "sets",
     price: 999, mrp: 1299, colours: ["olive", "sage", "slate", "brown", "plum", "beige"],
     description: "A utility-style zip jacket with chest pockets and a teddy patch, paired with ribbed-cuff joggers. Brushed cotton for warmth without bulk.",
@@ -106,11 +101,6 @@ window.PRODUCTS = [
     id: "striped-dungaree-set", name: "Striped Tee & Dungaree Set", category: "dungarees",
     price: 849, mrp: 1099, colours: ["default"],
     description: "Olive cotton dungarees with a cute patch, paired with a classic striped tee.",
-  },
-  {
-    id: "duck-stripe-set", name: "Duck Stripe Tee & Pants Set", category: "sets",
-    price: 649, mrp: 849, colours: ["blue", "peach"],
-    description: "A fun character tee with candy stripes, and matching pull-on pants.",
   },
   {
     id: "collar-sleepsuit", name: "Printed Collar Sleepsuit", category: "rompers",

@@ -1,5 +1,5 @@
 /* Shared storefront logic: catalogue helpers, header/footer, bag drawer,
-   WhatsApp checkout, and page renderers (home / shop / product). */
+   WhatsApp checkout, and page renderers (home / shop / product / info). */
 (function () {
   const S = window.STORE;
   const IMAGES = window.PRODUCT_IMAGES;
@@ -55,12 +55,12 @@
       ["shop.html?cat=newborn", "Newborn"],
       ["shop.html?cat=winter", "Winter wear"],
       ["index.html#about", "Our story"],
-      ["index.html#contact", "Contact"],
+      ["contact.html", "Contact"],
     ];
     const logo = `<a class="logo" href="index.html" aria-label="${esc(S.name)} home">${ICON.logo}<span>${esc(S.name)}</span></a>`;
 
     document.body.insertAdjacentHTML("afterbegin", `
-      <div class="announce">Free shipping on orders above ${money(S.freeShippingAbove)} · Order easily on WhatsApp</div>
+      <div class="announce">Free shipping on orders of ${money(S.freeShippingAbove)}+ · ${S.cod.enabled ? "Cash on delivery available · " : ""}Order easily on WhatsApp</div>
       <header class="header">
         <div class="wrap">
           <button class="icon-btn menu-btn" aria-label="Open menu" data-open-menu>${ICON.menu}</button>
@@ -80,9 +80,10 @@
             <div>${logo}<p class="muted" style="max-width:320px">${esc(S.tagline)}. Thoughtfully picked for comfort, play and cuddles.</p></div>
             <div><h5>Shop</h5><ul>${CATS.map((c) => `<li><a href="shop.html?cat=${c.id}">${c.label}</a></li>`).join("")}</ul></div>
             <div><h5>Help</h5><ul>
-              <li><a href="index.html#contact">Contact us</a></li>
-              <li><a href="#" data-open-bag>Your bag</a></li>
-              <li><a href="product.html?id=${PRODUCTS[0].id}#sizes">Size guide</a></li>
+              <li><a href="contact.html">Contact us</a></li>
+              <li><a href="shipping.html">Shipping</a></li>
+              <li><a href="returns.html">Returns & exchange</a></li>
+              <li><a href="size-guide.html">Size guide</a></li>
             </ul></div>
             <div><h5>Say hello</h5><ul>
               <li><a href="https://wa.me/${S.whatsapp}" target="_blank" rel="noopener">WhatsApp</a></li>
@@ -90,7 +91,7 @@
               <li><a href="${S.instagram}" target="_blank" rel="noopener">Instagram</a></li>
             </ul></div>
           </div>
-          <div class="footer-bottom"><span>© ${new Date().getFullYear()} ${esc(S.name)}. Made with love for little ones.</span><span>Secure ordering via WhatsApp</span></div>
+          <div class="footer-bottom"><span>© ${new Date().getFullYear()} ${esc(S.legalName.startsWith("[") ? S.name : S.legalName)}. Made with love for little ones.</span><span class="footer-legal"><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="returns.html">Refunds</a></span></div>
         </div>
       </footer>
       <div class="overlay" data-close></div>
@@ -108,6 +109,11 @@
             <div class="field"><label for="c-addr">Address</label><textarea id="c-addr" name="address" required autocomplete="street-address"></textarea></div>
             <div class="field"><label for="c-pin">Pincode</label><input id="c-pin" name="pincode" inputmode="numeric" autocomplete="postal-code"></div>
             <div class="field"><label for="c-note">Note (optional)</label><input id="c-note" name="note" placeholder="Gift wrap, preferred delivery time…"></div>
+            <div class="field"><label>Payment</label>
+              <label class="pay-opt"><input type="radio" name="pay" value="prepaid" checked><span><b>Pay online (UPI / card)</b><small>We'll send a secure payment link on WhatsApp</small></span></label>
+              <label class="pay-opt" data-cod-opt><input type="radio" name="pay" value="cod"><span><b>Cash on delivery</b><small data-cod-note></small></span></label>
+            </div>
+            <p class="muted" style="font-size:13px">By placing an order you agree to our <a href="terms.html" style="text-decoration:underline">Terms</a> and <a href="returns.html" style="text-decoration:underline">Returns policy</a>.</p>
           </form>
         </div>
         <div class="drawer-foot"></div>
@@ -152,14 +158,46 @@
         }).join("")
       : `<div class="drawer-empty"><div class="ic">🧸</div><h4>Your bag is empty</h4><p>Let's find something snuggly.</p><a class="btn btn-primary" href="shop.html">Start shopping</a></div>`;
 
+    // COD availability depends on the bag total.
+    const codOpt = $("[data-cod-opt]");
+    codOpt.style.display = S.cod.enabled ? "" : "none";
+    const codInput = $("input[value=cod]", codOpt);
+    codInput.disabled = !codAllowed();
+    if (codInput.disabled && codInput.checked) $("input[value=prepaid]").checked = true;
+    $("[data-cod-note]").textContent = codAllowed()
+      ? (S.cod.fee ? `${money(S.cod.fee)} COD handling fee` : "No extra fee")
+      : `Available on orders of ${money(S.cod.minOrder)} or more`;
+
     const inCheckout = drawer.classList.contains("checkout");
+    const t = totals();
     $(".drawer-foot").style.display = count ? "" : "none";
     $(".drawer-foot").innerHTML = `
-      <div class="row"><span>Subtotal</span><span>${money(total)}</span></div>
-      <small>${left > 0 ? "Shipping calculated on confirmation" : "Free shipping included"}</small>
+      <div class="sum"><span>Subtotal</span><span>${money(t.sub)}</span></div>
+      <div class="sum"><span>Shipping</span><span>${t.ship ? money(t.ship) : "Free"}</span></div>
+      ${t.cod ? `<div class="sum"><span>COD fee</span><span>${money(t.cod)}</span></div>` : ""}
+      <div class="row"><span>Total</span><span>${money(t.total)}</span></div>
+      <small>Inclusive of all taxes</small>
       ${inCheckout
-        ? `<button class="btn btn-whatsapp btn-block" data-send>${ICON.wa} Send order on WhatsApp</button>`
-        : `<button class="btn btn-primary btn-block" data-checkout>Checkout · ${money(total)}</button>`}`;
+        ? `<button class="btn btn-whatsapp btn-block" data-send>${ICON.wa} Place order on WhatsApp</button>`
+        : `<button class="btn btn-primary btn-block" data-checkout>Checkout · ${money(t.total)}</button>`}`;
+  }
+
+  const payMethod = () => ($(".checkout-form input[name=pay]:checked") || {}).value || "prepaid";
+  const codAllowed = () => S.cod.enabled && bagTotal() >= S.cod.minOrder;
+  function totals() {
+    const sub = bagTotal();
+    const ship = !sub || sub >= S.freeShippingAbove ? 0 : S.shippingFee;
+    const cod = payMethod() === "cod" && codAllowed() ? S.cod.fee : 0;
+    return { sub, ship, cod, total: sub + ship + cod };
+  }
+  document.addEventListener("change", (e) => { if (e.target.name === "pay") renderBag(); });
+
+  // Short, readable order reference, e.g. LO-250924-7K3F
+  function orderId() {
+    const prefix = S.name.split(/\s+/).map((w) => w[0]).join("").toUpperCase();
+    const d = new Date();
+    const date = [d.getFullYear() % 100, d.getMonth() + 1, d.getDate()].map((n) => String(n).padStart(2, "0")).join("");
+    return `${prefix}-${date}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
   }
 
   document.addEventListener("click", (e) => {
@@ -182,14 +220,30 @@
       const p = byId(l.id);
       return `${i + 1}. ${p.name}\n   Colour: ${COLOURS[l.colour].label} · Size: ${l.size} · Qty: ${l.qty} · ${money(p.price * l.qty)}`;
     });
+    const t = totals();
+    const id = orderId();
     const msg = [
-      `Hi ${S.name}! I'd like to place an order 🛍️`, "",
+      `Hi ${S.name}! I'd like to place an order 🛍️`,
+      `Order ID: ${id}`, "",
       ...lines, "",
-      `Subtotal: ${money(bagTotal())}`, "",
+      `Subtotal: ${money(t.sub)}`,
+      `Shipping: ${t.ship ? money(t.ship) : "Free"}`,
+      t.cod ? `COD fee: ${money(t.cod)}` : null,
+      `Total: ${money(t.total)}`,
+      `Payment: ${payMethod() === "cod" ? "Cash on delivery" : "Pay online (please send payment link)"}`, "",
       `Name: ${d.name}`, `Phone: ${d.phone}`, `Address: ${d.address}${d.pincode ? ", " + d.pincode : ""}`,
-      d.note ? `Note: ${d.note}` : "",
-    ].filter((x, i, a) => x !== "" || a[i - 1] !== "").join("\n");
-    window.open(`https://wa.me/${S.whatsapp}?text=${encodeURIComponent(msg)}`, "_blank", "noopener");
+      d.note ? `Note: ${d.note}` : null,
+    ].filter((x) => x !== null).join("\n");
+    const url = `https://wa.me/${S.whatsapp}?text=${encodeURIComponent(msg)}`;
+    window.open(url, "_blank", "noopener");
+
+    // Show a confirmation with a retry link, then empty the bag.
+    bag = []; save();
+    $(".drawer").classList.remove("checkout");
+    $(".ship-bar").style.display = "none";
+    $(".lines").innerHTML = `<div class="drawer-empty"><div class="ic">💌</div><h4>Almost done!</h4>
+      <p>Your order <b>${id}</b> is ready in WhatsApp. Just press <b>Send</b> there and we'll confirm it shortly.</p>
+      <a class="btn btn-whatsapp" href="${url}" target="_blank" rel="noopener">${ICON.wa} WhatsApp didn't open? Tap here</a></div>`;
   }
 
   let toastTimer;
@@ -242,11 +296,13 @@
   // ---------- pages ----------
   function home() {
     $("[data-brand]") && $$("[data-brand]").forEach((el) => (el.textContent = S.name));
-    const catImg = { newborn: ["newborn-cap-bib-set", "cream"], rompers: ["sleeveless-button-romper", "green"], sets: ["star-cloud-jogger-set", "rust"], dungarees: ["mickey-dungaree-set", "camel"], winter: ["zebra-hooded-suit", "green"], night: ["printed-night-suit", "peach"] };
+    const catImg = { newborn: ["newborn-cap-bib-set", "cream"], rompers: ["sleeveless-button-romper", "green"], sets: ["star-cloud-jogger-set", "rust"], dungarees: ["striped-dungaree-set", "default"], winter: ["zebra-hooded-suit", "green"], night: ["printed-night-suit", "peach"] };
     $("#cats").innerHTML = CATS.map((c) => {
       const [pid, col] = catImg[c.id];
       return `<a class="cat reveal" href="shop.html?cat=${c.id}"><div class="arch-img"><img src="${img(IMAGES[pid][col][0], true)}" alt="${c.label}" loading="lazy"></div><h3>${c.label}</h3><p>${c.blurb}</p></a>`;
     }).join("");
+    $("#stat-styles").textContent = PRODUCTS.length;
+    $("#stat-colours").textContent = PRODUCTS.reduce((n, p) => n + p.colours.length, 0);
     $("#new").innerHTML = PRODUCTS.slice(0, 8).map(card).join("");
     const strip = [["tiger-stripe-suit", "orange", 1], ["double-top-set", "teal", 0], ["hooded-teddy-suit", "pistachio", 0], ["zip-bomber-jogger-set", "olive", 0], ["checked-hooded-jumpsuit", "pink", 0], ["little-star-cardigan-set", "blue", 0]];
     $("#strip").innerHTML = strip.map(([pid, col, n]) => `<a href="product.html?id=${pid}&colour=${col}"><img src="${img(IMAGES[pid][col][n], true)}" alt="" loading="lazy"></a>`).join("");
@@ -312,9 +368,9 @@
           <div class="mini-trust"><div><b>🌿</b>Soft cotton</div><div><b>🚚</b>Fast delivery</div><div><b>↺</b>Easy exchange</div></div>
           <div class="perks">
             <details open><summary>Description</summary><p>${esc(p.description)}</p></details>
-            <details><summary>Size guide</summary><ul><li>0–3M: up to 6 kg · 62 cm</li><li>3–6M: 6–8 kg · 68 cm</li><li>6–12M: 8–10 kg · 80 cm</li><li>12–18M: 10–11 kg · 86 cm</li><li>18–24M: 11–13 kg · 92 cm</li></ul></details>
+            <details><summary>Size guide</summary><ul><li>0–3M: up to 6 kg · 62 cm</li><li>3–6M: 6–8 kg · 68 cm</li><li>6–12M: 8–10 kg · 80 cm</li><li>12–18M: 10–11 kg · 86 cm</li><li>18–24M: 11–13 kg · 92 cm</li></ul><p><a href="size-guide.html" style="text-decoration:underline">Full size guide & how to measure</a></p></details>
             <details><summary>Care</summary><p>Machine wash cold, inside out, with similar colours. Mild detergent, no bleach. Tumble dry low or line dry in shade.</p></details>
-            <details><summary>Shipping & exchange</summary><p>Dispatched in 1–2 working days. Free shipping above ${money(S.freeShippingAbove)}. Size exchange within 7 days of delivery, unworn with tags.</p></details>
+            <details><summary>Shipping & exchange</summary><p>Dispatched in ${S.dispatchDays} working days. Free shipping on orders of ${money(S.freeShippingAbove)} or more. Size exchange within ${S.exchangeDays} days of delivery, unworn with tags. <a href="shipping.html" style="text-decoration:underline">Shipping</a> · <a href="returns.html" style="text-decoration:underline">Returns</a></p></details>
           </div>
         </div>
       </div>`;
@@ -349,7 +405,7 @@
     $("#add").addEventListener("click", () => { if (!needSize()) addToBag(p.id, colour, size, qty); });
     $("#wa").addEventListener("click", () => {
       if (needSize()) return;
-      const msg = `Hi ${S.name}! I'd like to order:\n\n${p.name}\nColour: ${COLOURS[colour].label} · Size: ${size} · Qty: ${qty}\nPrice: ${money(p.price * qty)}\n\n${location.href}`;
+      const msg = `Hi ${S.name}! I'd like to order:\nOrder ID: ${orderId()}\n\n${p.name}\nColour: ${COLOURS[colour].label} · Size: ${size} · Qty: ${qty}\nPrice: ${money(p.price * qty)}\n\n${location.href}`;
       window.open(`https://wa.me/${S.whatsapp}?text=${encodeURIComponent(msg)}`, "_blank", "noopener");
     });
     drawGallery();
@@ -360,7 +416,24 @@
 
   // ---------- boot ----------
   chrome();
-  const pages = { home, shop, product };
+  // Policy / info pages: fill <span data-s="key"> with values from config.js.
+  function info() {
+    const val = (k) => {
+      if (k === "money.freeShippingAbove") return money(S.freeShippingAbove);
+      if (k === "money.shippingFee") return money(S.shippingFee);
+      if (k === "money.codFee") return money(S.cod.fee);
+      if (k === "money.codMin") return money(S.cod.minOrder);
+      return S[k];
+    };
+    $$("[data-s]").forEach((el) => { const v = val(el.dataset.s); if (v !== undefined && v !== "") el.textContent = v; else if (el.dataset.optional !== undefined) el.closest("[data-row]")?.remove(); });
+    $$("[data-href]").forEach((el) => {
+      const k = el.dataset.href;
+      el.href = k === "whatsapp" ? `https://wa.me/${S.whatsapp}` : k === "email" ? `mailto:${S.email}` : S[k];
+    });
+    $$("[data-cod-only]").forEach((el) => { if (!S.cod.enabled) el.remove(); });
+  }
+
+  const pages = { home, shop, product, info };
   (pages[document.body.dataset.page] || (() => {}))();
   reveal();
 })();
