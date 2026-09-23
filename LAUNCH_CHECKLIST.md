@@ -31,6 +31,8 @@ All of these go in `config.js` except prices, which live in `data/products.js`.
 |---|---|---|
 | ⏸ | **Prices and MRP for all 15 products** | Placeholder prices are live. Owner will send real ones; update `data/products.js`. |
 | ⏸ | **Business details for Contact and policy pages** | Registered business name (no company yet; own name works for a sole proprietor), business address, grievance officer name, GSTIN (optional). Set in `config.js`; placeholders in [brackets] are live. |
+| ⏸ | **Secure the Wynoak name online** | Register **wynoak.com** (unregistered as of 2026-09-24; buy soon) and check/register **wynoak.in** (lookup didn't go through). Claim the **@wynoak** Instagram handle, and ideally the same on Facebook and YouTube. Then set `instagram` in `config.js` so the footer link appears. |
+| ⏸ | **Trademark search for "Wynoak"** | Search the IP India public trademark search (class 25 clothing, class 35 retail) **before printing packaging or labels**. If it's clear, file an application (sole proprietors and startups pay a reduced fee). Investors will ask about this. |
 | ⏸ | **Review all policy wording** | Shipping, Returns/Exchange/Refunds, Terms, Privacy, Contact, and the size chart numbers. Also check the product descriptions' fabric claims ("soft cotton", "brushed cotton"), the 7-day exchange, 48-hour damage window, 1–2 day dispatch and 3–7 day delivery. All are drafts. |
 | ⏸ | **Legal and business requirements** | Business entity, GST decision (with a CA), Udyam/MSME, current bank account, packaging labels under Legal Metrology rules (MRP, manufacturer/packer name and address, month and year of packing, size, customer-care contact, **country of origin** per product), DPDP Act compliance once marketing messages start. |
 | ⏸ | **Admin dashboard for the catalogue** | Today, adding, editing or removing products means editing `data/products.js` and running `scripts/build-images.py`. Plan an admin (options: Google Sheet as the catalogue with photo upload, a headless CMS such as Decap or Sanity, or moving to Shopify/Dukaan). Needs a decision on who will manage the catalogue day to day. |
@@ -88,7 +90,7 @@ Investors will ask for numbers, so the analytics and order log in sections 3 and
 | ⬜ | **Unit economics per product**: landed cost, selling price, gateway, shipping, packaging and COD costs, and the cost of returns, giving contribution margin |
 | ⬜ | **Supply chain**: who makes or supplies each item (the folder names look like supplier SKU codes), minimum order quantities, lead times, reorder plan, quality checks |
 | ⬜ | **Differentiation**: why this brand over FirstCry, Hopscotch, Mothercare and D2C labels. Own designs, fabric, price point, community? If the products are wholesale or white-label today, have a plan for own designs or private label |
-| ⬜ | **Brand protection**: trademark search and filing for **Wynoak** (IP India, class 25 clothing and class 35 retail), domain, social handles |
+| ⬜ | **Brand protection**: trademark filed for Wynoak, domain and social handles secured (see section 2) |
 | ⬜ | **Company structure**: most investors need a **Private Limited company**; founders' agreement, cap table, bank account, GST, basic bookkeeping |
 | ⬜ | **Audience**: Instagram following and engagement, WhatsApp opt-in list size, customer testimonials |
 | ⬜ | **Pitch deck**: problem, customer, product, traction, unit economics, market size, competition, go-to-market, team, the ask and how funds will be used |
