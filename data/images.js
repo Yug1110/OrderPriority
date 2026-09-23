@@ -141,29 +141,6 @@ window.PRODUCT_IMAGES = {
       "assets/products/zip-fleece-suit/default-5"
     ]
   },
-  "zebra-hooded-suit": {
-    "green": [
-      "assets/products/zebra-hooded-suit/green-1",
-      "assets/products/zebra-hooded-suit/green-2",
-      "assets/products/zebra-hooded-suit/green-3",
-      "assets/products/zebra-hooded-suit/green-4",
-      "assets/products/zebra-hooded-suit/green-5"
-    ],
-    "mustard": [
-      "assets/products/zebra-hooded-suit/mustard-1",
-      "assets/products/zebra-hooded-suit/mustard-2",
-      "assets/products/zebra-hooded-suit/mustard-3",
-      "assets/products/zebra-hooded-suit/mustard-4",
-      "assets/products/zebra-hooded-suit/mustard-5"
-    ],
-    "red": [
-      "assets/products/zebra-hooded-suit/red-1",
-      "assets/products/zebra-hooded-suit/red-2",
-      "assets/products/zebra-hooded-suit/red-3",
-      "assets/products/zebra-hooded-suit/red-4",
-      "assets/products/zebra-hooded-suit/red-5"
-    ]
-  },
   "tiger-stripe-suit": {
     "black": [
       "assets/products/tiger-stripe-suit/black-1",

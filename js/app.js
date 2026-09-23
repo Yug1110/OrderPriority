@@ -25,7 +25,7 @@
     left: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg>',
     right: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg>',
     wa: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z"/></svg>',
-    logo: '<svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="19" fill="#EFE4D6"/><path d="M25.5 11.5a9 9 0 1 0 3.2 12.2 7 7 0 1 1-3.2-12.2z" fill="#C8795A"/><circle cx="27.5" cy="13" r="1.4" fill="#D9A84E"/><circle cx="30.5" cy="18" r="0.9" fill="#D9A84E"/></svg>',
+    logo: '<svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="19" fill="#EFE4D6"/><path d="M12.8 19h14.4v2.2c0 5.3-3.3 9.4-7.2 10.9-3.9-1.5-7.2-5.6-7.2-10.9z" fill="#C8795A"/><path d="M11.2 19.4c0-4.1 3.9-7 8.8-7s8.8 2.9 8.8 7z" fill="#5B4636"/><path d="M20 12.6c0-2.1.9-3.6 2.5-4.4" stroke="#5B4636" stroke-width="1.6" stroke-linecap="round"/><path d="M22.4 8.6c2.4-1.7 5.3-1.4 6.6 0-1.7 1.7-4.6 1.9-6.6 0z" fill="#8A9A7B"/></svg>',
   };
 
   // ---------- bag state (persisted in localStorage) ----------
@@ -49,7 +49,7 @@
   // ---------- shared chrome ----------
   function chrome() {
     const page = document.body.dataset.page;
-    document.title = document.title.replace("Little Oat", S.name);
+    document.title = document.title.replace("Wynoak", S.name);
     const navLinks = [
       ["shop.html", "Shop all", "shop"],
       ["shop.html?cat=newborn", "Newborn"],
@@ -77,7 +77,7 @@
       <footer class="footer">
         <div class="wrap">
           <div class="footer-grid">
-            <div>${logo}<p class="muted" style="max-width:320px">${esc(S.tagline)}. Thoughtfully picked for comfort, play and cuddles.</p></div>
+            <div>${logo}<p class="muted" style="max-width:320px">${esc(S.tagline)} Soft, sturdy clothes for comfort, play and cuddles.</p></div>
             <div><h5>Shop</h5><ul>${CATS.map((c) => `<li><a href="shop.html?cat=${c.id}">${c.label}</a></li>`).join("")}</ul></div>
             <div><h5>Help</h5><ul>
               <li><a href="contact.html">Contact us</a></li>
@@ -194,7 +194,8 @@
 
   // Short, readable order reference, e.g. LO-250924-7K3F
   function orderId() {
-    const prefix = S.name.split(/\s+/).map((w) => w[0]).join("").toUpperCase();
+    const words = S.name.trim().split(/\s+/);
+    const prefix = (words.length > 1 ? words.map((w) => w[0]).join("") : words[0].slice(0, 3)).toUpperCase();
     const d = new Date();
     const date = [d.getFullYear() % 100, d.getMonth() + 1, d.getDate()].map((n) => String(n).padStart(2, "0")).join("");
     return `${prefix}-${date}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
@@ -296,7 +297,7 @@
   // ---------- pages ----------
   function home() {
     $("[data-brand]") && $$("[data-brand]").forEach((el) => (el.textContent = S.name));
-    const catImg = { newborn: ["newborn-cap-bib-set", "cream"], rompers: ["sleeveless-button-romper", "green"], sets: ["star-cloud-jogger-set", "rust"], dungarees: ["striped-dungaree-set", "default"], winter: ["zebra-hooded-suit", "green"], night: ["printed-night-suit", "peach"] };
+    const catImg = { newborn: ["newborn-cap-bib-set", "cream"], rompers: ["sleeveless-button-romper", "green"], sets: ["star-cloud-jogger-set", "rust"], dungarees: ["striped-dungaree-set", "default"], winter: ["hooded-teddy-suit", "cream"], night: ["printed-night-suit", "peach"] };
     $("#cats").innerHTML = CATS.map((c) => {
       const [pid, col] = catImg[c.id];
       return `<a class="cat reveal" href="shop.html?cat=${c.id}"><div class="arch-img"><img src="${img(IMAGES[pid][col][0], true)}" alt="${c.label}" loading="lazy"></div><h3>${c.label}</h3><p>${c.blurb}</p></a>`;

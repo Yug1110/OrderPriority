@@ -37,7 +37,6 @@ FOLDERS = {
     "MIXMIX 1531": ("striped-dungaree-set", {}),
     "T G 2653": ("hooded-teddy-suit", {"f": "cream", "p": "pistachio", "pink": "pink"}),
     "T G 799 ONION": ("zip-fleece-suit", {}),
-    "TG 2658": ("zebra-hooded-suit", {"g": "green", "o": "mustard", "r": "red"}),
     "TG 5649": ("tiger-stripe-suit", {"b": "black", "o": "orange", "r": "red"}),
     "TG 6445": ("zip-bomber-jogger-set", {"a": "sage", "b": "olive", "c": "slate", "d": "brown", "e": "plum", "f": "beige"}),
     "TeWE": ("collar-sleepsuit", {"c": "beige", "l": "ivory"}),

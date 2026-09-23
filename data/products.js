@@ -43,11 +43,6 @@ window.CATEGORIES = [
 
 window.PRODUCTS = [
   {
-    id: "zebra-hooded-suit", name: "Zebra Stripe Hooded Suit", category: "winter",
-    price: 1049, mrp: 1399, colours: ["green", "mustard", "red"], badge: "Bestseller",
-    description: "A plush, fleece-lined hooded suit with a playful zebra print, built-in feet and fold-over mittens. Front zip for quick changes.",
-  },
-  {
     id: "zip-bomber-jogger-set", name: "Zip Bomber & Jogger Set", category: "sets",
     price: 999, mrp: 1299, colours: ["olive", "sage", "slate", "brown", "plum", "beige"],
     description: "A utility-style zip jacket with chest pockets and a teddy patch, paired with ribbed-cuff joggers. Brushed cotton for warmth without bulk.",

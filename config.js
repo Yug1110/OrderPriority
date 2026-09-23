@@ -2,8 +2,8 @@
 // Values marked TODO are placeholders that must be replaced before launch
 // (see LAUNCH_CHECKLIST.md).
 window.STORE = {
-  name: "Little Oat", // TODO brand name
-  tagline: "Soft cotton clothes for little ones",
+  name: "Wynoak",
+  tagline: "Grown to last.",
   siteUrl: "https://order-priority.vercel.app",
 
   // WhatsApp number in international format, digits only (e.g. 919876543210).

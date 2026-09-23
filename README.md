@@ -1,4 +1,4 @@
-# Little Oat — baby clothing storefront
+# Wynoak — baby clothing storefront
 
 A fast, static storefront for baby clothes (0–24 months). No backend: shoppers build a bag and send their order to you as a pre-filled WhatsApp message.
 
@@ -17,7 +17,7 @@ A fast, static storefront for baby clothes (0–24 months). No backend: shoppers
 
 Commit and push to `main` — Vercel redeploys in about a minute.
 
-After changing the brand name or tagline, also run `python3 scripts/make-share-image.py` (link-preview image) and replace `Little Oat` in the `<meta>` tags at the top of each `.html` file (crawlers don't run JavaScript).
+After changing the brand name or tagline, also run `python3 scripts/make-share-image.py` (link-preview image) and replace `Wynoak` in the `<title>` and `<meta>` tags at the top of each `.html` file (crawlers don't run JavaScript).
 
 **Before going live, set your real WhatsApp number** in `config.js` (international format, digits only, e.g. `919876543210`).
 
@@ -30,7 +30,7 @@ After changing the brand name or tagline, also run `python3 scripts/make-share-i
 
 ## Orders
 
-Checkout sends a WhatsApp message with an order ID (e.g. `LO-260924-7K3F`), items, shipping, COD fee, total and payment choice. Confirm on WhatsApp, send a Razorpay payment link for prepaid orders, then book the shipment in Shiprocket.
+Checkout sends a WhatsApp message with an order ID (e.g. `WYN-260924-7K3F`), items, shipping, COD fee, total and payment choice. Confirm on WhatsApp, send a Razorpay payment link for prepaid orders, then book the shipment in Shiprocket.
 
 ## Run locally
 

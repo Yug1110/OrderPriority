@@ -72,7 +72,7 @@ def og():
     d.text((66, 190), NAME, font=title, fill=WALNUT)
     body = font("nunito.ttf", 30, 500)
     y = 310
-    for line in wrap(TAGLINE + ".", body, 470):
+    for line in wrap(TAGLINE if TAGLINE[-1] in ".!?" else TAGLINE + ".", body, 470):
         d.text((70, y), line, font=body, fill=WALNUT2)
         y += 42
     pill = font("nunito.ttf", 24, 800)
@@ -94,15 +94,17 @@ def wrap(text, f, width):
 
 
 def icon():
-    s = 180
-    c = Image.new("RGB", (s, s), OAT)
+    # acorn mark, matching assets/brand/favicon.svg (drawn at 4x, then downsampled)
+    k, s = 4, 180
+    c = Image.new("RGB", (s * k, s * k), OAT)
     d = ImageDraw.Draw(c)
-    # crescent moon mark, matching assets/brand/favicon.svg
-    d.ellipse((38, 38, 142, 142), fill=TERRA)
-    d.ellipse((62, 22, 162, 122), fill=OAT)
-    d.ellipse((120, 50, 132, 62), fill="#d9a84e")
-    d.ellipse((140, 86, 148, 94), fill="#d9a84e")
-    c.save(os.path.join(ROOT, "assets", "brand", "apple-touch-icon.png"))
+    u = s * k / 40  # svg units -> pixels
+    d.rounded_rectangle((12.8 * u, 17 * u, 27.2 * u, 24 * u), 1 * u, fill=TERRA)
+    d.chord((12.8 * u, 12 * u, 27.2 * u, 32.4 * u), 0, 180, fill=TERRA)
+    d.chord((11.2 * u, 12.4 * u, 28.8 * u, 26.4 * u), 180, 360, fill=WALNUT)
+    d.line((20 * u, 12.8 * u, 21.2 * u, 8.6 * u), fill=WALNUT, width=int(1.6 * u))
+    d.ellipse((22.2 * u, 7.2 * u, 29 * u, 10 * u), fill="#8a9a7b")
+    c.resize((s, s), Image.LANCZOS).save(os.path.join(ROOT, "assets", "brand", "apple-touch-icon.png"))
 
 
 if __name__ == "__main__":
