@@ -69,6 +69,14 @@ function orderId() {
 // ---------------------------------------------------------------- boot & auth
 const initialHash = location.hash;
 const authType = (/[#&]type=(invite|recovery|signup|magiclink)/.exec(initialHash) || [])[1];
+const authError = (() => {
+  const m = /[#&]error_code=([^&]+)/.exec(initialHash) || /[#&]error=([^&]+)/.exec(initialHash);
+  if (!m) return "";
+  return m[1] === "otp_expired"
+    ? "That link has already been used or has expired."
+    : decodeURIComponent((/[#&]error_description=([^&]+)/.exec(initialHash) || [, "The link didn't work."])[1].replace(/\+/g, " "));
+})();
+if (authError) history.replaceState(null, "", location.pathname);
 
 async function boot() {
   let cfg;
@@ -88,7 +96,7 @@ async function boot() {
   });
   const { data } = await sb.auth.getSession();
   session = data.session;
-  if (!session) return showLogin();
+  if (!session) return showLogin(authError ? `${authError} Log in below, or use “Forgot password?” to get a new link by email.` : "");
   if (authType === "invite" || authType === "recovery") return showSetPassword(authType);
   enter();
 }
@@ -134,7 +142,9 @@ function showSetPassword(kind) {
       <div class="field"><label for="pw2">Repeat password</label><input id="pw2" type="password" autocomplete="new-password" minlength="8" required></div>
       <p class="form-error" id="err"></p>
       <button class="btn btn-primary btn-block" type="submit">Save password</button>
-    </form>`);
+    </form>
+    ${kind === "change" ? '<p style="margin:16px 0 0;text-align:center"><a class="link-btn" href="#/dashboard" id="pw-cancel">Cancel</a></p>' : ""}`);
+  $("#pw-cancel")?.addEventListener("click", (e) => { e.preventDefault(); enter(); });
   $("#setpw").addEventListener("submit", async (e) => {
     e.preventDefault();
     const a = $("#pw1").value, b = $("#pw2").value;
@@ -164,9 +174,10 @@ async function enter() {
   categories = cats || [];
   productNames = Object.fromEntries((prods || []).map((p) => [p.id, p.name]));
   shell();
-  if (!location.hash || /access_token|type=/.test(location.hash)) history.replaceState(null, "", "#/dashboard");
+  if (!location.hash || /access_token|type=|error=/.test(location.hash)) history.replaceState(null, "", "#/dashboard");
   window.onhashchange = route;
   route();
+  if (authError) toast(`${authError} You're already logged in. Use “Change password” in the menu if you haven't set one yet.`);
 }
 
 // ---------------------------------------------------------------- layout & routing
@@ -181,6 +192,7 @@ function shell() {
         ${NAV.map(([id, label, ic]) => `<a class="nav-item" href="#/${id}" data-nav="${id}"><span>${ic}</span>${label}${id === "orders" ? '<span class="count" id="new-count" hidden></span>' : ""}</a>`).join("")}
         <div class="spacer"></div>
         <a class="nav-item" href="/" target="_blank"><span>🛍️</span>View shop ↗</a>
+        <a class="nav-item" href="#" id="changepw"><span>🔑</span>Change password</a>
         <a class="nav-item" href="#" id="signout"><span>🚪</span>Log out</a>
         <div class="me">${esc(session.user.email)}</div>
       </aside>
@@ -188,6 +200,7 @@ function shell() {
     </div>`;
   $("#menu").addEventListener("click", () => $("#side").classList.toggle("open"));
   $("#signout").addEventListener("click", (e) => { e.preventDefault(); sb.auth.signOut(); });
+  $("#changepw").addEventListener("click", (e) => { e.preventDefault(); showSetPassword("change"); });
   $("#side").addEventListener("click", (e) => { if (e.target.closest("a")) $("#side").classList.remove("open"); });
   refreshNewCount();
 }
@@ -218,7 +231,7 @@ async function route() {
     else if (section === "categories") await viewCategories(view);
     else if (section === "settings") await viewSettings(view);
     else if (section === "team") await viewTeam(view);
-    else view.innerHTML = "<p>Page not found.</p>";
+    else { history.replaceState(null, "", "#/dashboard"); return route(); }
   } catch (e) {
     console.error(e);
     view.innerHTML = `<div class="panel"><h2>Couldn't load this page</h2><p class="muted-note">${esc(e.message || e)}</p></div>`;
