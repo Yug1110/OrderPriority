@@ -7,12 +7,15 @@ Storefront for baby clothes (0–24 months) with an admin dashboard. Shoppers bu
 - **What's left before launch:** [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md)
 - **Using the admin:** [docs/ADMIN_GUIDE.md](docs/ADMIN_GUIDE.md)
 - **One-time admin setup (Supabase):** [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md)
+- **Online payments & order emails setup:** [docs/PAYMENTS_EMAIL_SETUP.md](docs/PAYMENTS_EMAIL_SETUP.md)
 
 ## How it fits together
 
 ```
-Shoppers → static pages (index/shop/product/policies) → /api/catalog → Supabase (edge-cached 60 s)
-                                                      → /api/orders  → Supabase (prices recomputed on the server)
+Shoppers → static pages (index/shop/product/checkout/track/policies) → /api/catalog → Supabase (edge-cached 60 s)
+           checkout (online / COD / WhatsApp) → /api/orders → Supabase (prices recomputed on the server)
+           Razorpay Checkout → /api/pay-verify + /api/pay-webhook (signature-checked) → order marked paid
+           order emails → SMTP (api/_mail.js) on placed / paid / confirmed / shipped / delivered / cancelled
 Admins   → /admin/ (login) → Supabase directly, protected by row-level security (admins table)
 Photos uploaded in the admin → Supabase Storage "media" bucket → served at /media/* via a Vercel rewrite
 ```
@@ -28,8 +31,9 @@ Everything (products, photos, stock, prices, categories, store settings, team) i
 npx supabase start                      # local database, auth, storage (needs Docker)
 npx supabase status -o env              # local keys → put URL/keys in .env.local
 ENV_FILE=.env.local node scripts/migrate-to-supabase.mjs you@example.com   # import catalogue + first admin
+node scripts/mock-razorpay.mjs          # fake Razorpay API for local payment tests (RAZORPAY_API=http://127.0.0.1:4010)
 node scripts/dev-server.mjs             # http://127.0.0.1:3000 (static site + api/*.js + /media proxy)
-docker exec -i supabase_db_wynoak psql -U postgres < supabase/tests/store_test.sql   # database tests
+for t in supabase/tests/*.sql; do docker exec -i supabase_db_wynoak psql -U postgres < $t; done   # database tests
 ```
 
 Deploying the database schema to the live project: `npx supabase db push --db-url "$DATABASE_URL"`.
@@ -41,7 +45,8 @@ index.html shop.html product.html        storefront pages (header/footer/bag inj
 contact/shipping/returns/terms/privacy/size-guide.html   policy pages, values filled from settings
 js/app.js  css/styles.css                storefront logic and styles
 admin/                                   admin app (index.html, admin.js, admin.css)
-api/                                     Vercel functions: catalog, orders, admin-invite, admin-config, keepalive
+api/                                     Vercel functions: catalog, orders, pay-verify/webhook/retry, track, order-notify, admin-invite, admin-config, keepalive
+checkout.html order-success.html track.html + js/checkout.js   checkout (Buy now / bag), confirmation, order tracking
 supabase/migrations/                     database schema, security rules, stock trigger, stats
 supabase/tests/store_test.sql            database tests (rolled back after running)
 config.js data/                          fallback snapshot used if the database is unreachable

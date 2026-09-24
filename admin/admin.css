@@ -158,3 +158,4 @@ table.data td.num, table.data th.num { text-align: right; white-space: nowrap; }
   .page-head h1 { font-size: 26px; }
 }
 @media (max-width: 600px) { .hide-sm { display: none; } table.data td, table.data th { padding: 10px; } }
+.pill.awaiting_payment { background: #fdf0d8; color: #8a5a00; }

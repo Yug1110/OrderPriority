@@ -16,12 +16,24 @@ const imgUrl = (base, small = true) => `/${base}${small ? "-sm" : ""}.webp`;
 const ICON_LOGO = '<svg viewBox="0 0 40 40" fill="none" width="30" height="30"><circle cx="20" cy="20" r="19" fill="#EFE4D6"/><path d="M12.8 19h14.4v2.2c0 5.3-3.3 9.4-7.2 10.9-3.9-1.5-7.2-5.6-7.2-10.9z" fill="#C8795A"/><path d="M11.2 19.4c0-4.1 3.9-7 8.8-7s8.8 2.9 8.8 7z" fill="#5B4636"/><path d="M20 12.6c0-2.1.9-3.6 2.5-4.4" stroke="#5B4636" stroke-width="1.6" stroke-linecap="round"/><path d="M22.4 8.6c2.4-1.7 5.3-1.4 6.6 0-1.7 1.7-4.6 1.9-6.6 0z" fill="#8A9A7B"/></svg>';
 
 const STATUSES = [
-  ["new", "New"], ["confirmed", "Confirmed"], ["paid", "Paid"], ["packed", "Packed"], ["shipped", "Shipped"],
+  ["awaiting_payment", "Awaiting payment"], ["new", "New"], ["confirmed", "Confirmed"], ["paid", "Paid"], ["packed", "Packed"], ["shipped", "Shipped"],
   ["delivered", "Delivered"], ["exchange", "Exchange"], ["cancelled", "Cancelled"], ["returned", "Returned"],
 ];
 const statusLabel = (s) => (STATUSES.find((x) => x[0] === s) || [s, s])[1];
 const pill = (s) => `<span class="pill ${esc(s)}">${esc(statusLabel(s))}</span>`;
-const SOURCE = { bag: "Website checkout", quick: "“Order on WhatsApp” button", admin: "Added in admin" };
+const SOURCE = { bag: "Website checkout", buy_now: "“Buy now” checkout", quick: "“Order on WhatsApp” button", admin: "Added in admin" };
+const PAYMENT = { online: "Paid online (Razorpay)", cod: "Cash on delivery", prepaid: "UPI / payment link" };
+const payShort = (o) => (o.payment === "cod" ? "COD" : o.payment === "online" ? (o.payment_status === "paid" ? "Online ✓" : "Online · unpaid") : "UPI link");
+
+// Email the customer about the order's current status (skipped if no email / already sent).
+async function notifyCustomer(id, { force = false, kind } = {}) {
+  try {
+    const r = await fetch("/api/order-notify", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` }, body: JSON.stringify({ id, force, kind }) });
+    const d = await r.json().catch(() => ({}));
+    if (d.status === "sent") toast(`Email sent to the customer (${d.kind})`);
+    else if (force) toast(d.reason ? `Email not sent: ${d.reason}` : d.error || "Email not sent", true);
+  } catch (e) { if (force) fail(e, "Email"); }
+}
 
 const DEFAULT_SETTINGS = {
   name: "Wynoak", tagline: "Grown to last.", whatsapp: "", phoneDisplay: "", email: "", instagram: "",
@@ -269,13 +281,13 @@ async function viewDashboard(view) {
       </select></div></div>
     <div class="tiles">
       <div class="tile"><div class="label">Revenue</div><div class="value">${money(s.revenue)}</div><div class="sub">from confirmed orders</div></div>
-      <div class="tile"><div class="label">Confirmed orders</div><div class="value">${s.confirmed}</div><div class="sub">${s.placed} placed in total</div></div>
+      <div class="tile"><div class="label">Confirmed orders</div><div class="value">${s.confirmed}</div><div class="sub">${s.placed} placed${s.abandoned ? ` · ${s.abandoned} unpaid online` : ""}</div></div>
       <div class="tile"><div class="label">Avg order value</div><div class="value">${money(s.aov)}</div><div class="sub">confirmed orders</div></div>
-      <div class="tile"><div class="label">Cash on delivery</div><div class="value">${codShare}%</div><div class="sub">${s.cod_orders} of ${s.confirmed} confirmed</div></div>
+      <div class="tile"><div class="label">Cash on delivery</div><div class="value">${codShare}%</div><div class="sub">${s.cod_orders} of ${s.confirmed} confirmed · ${s.online_orders || 0} paid online</div></div>
       <div class="tile"><div class="label">Cancelled / returned</div><div class="value">${s.cancelled}</div><div class="sub">${s.placed ? Math.round((s.cancelled / s.placed) * 100) : 0}% of placed</div></div>
     </div>
     <div class="panel"><h2>Order pipeline</h2>
-      <div class="pipeline">${STATUSES.slice(0, 7).map(([id, l]) => `<a href="#/orders?status=${id}"><b>${by[id] || 0}</b><span>${l}</span></a>`).join("")}</div>
+      <div class="pipeline">${STATUSES.slice(1, 8).map(([id, l]) => `<a href="#/orders?status=${id}"><b>${by[id] || 0}</b><span>${l}</span></a>`).join("")}</div>
     </div>
     <div class="grid-2">
       <div class="panel"><h2>Revenue by day <small>confirmed orders, ₹</small></h2><div class="chart" id="chart"></div></div>
@@ -353,7 +365,7 @@ async function viewOrders(view, params) {
     <div class="chips" id="status-chips" style="margin-bottom:12px">${[["all", "All"], ...STATUSES].map(([id, l]) => `<button class="chip" data-status="${id}">${l}</button>`).join("")}</div>
     <div class="toolbar-a">
       <input type="search" id="search" placeholder="Search order ID, name or phone">
-      <select id="pay" aria-label="Payment"><option value="all">All payments</option><option value="prepaid">Prepaid</option><option value="cod">Cash on delivery</option></select>
+      <select id="pay" aria-label="Payment"><option value="all">All payments</option><option value="online">Online (Razorpay)</option><option value="cod">Cash on delivery</option><option value="prepaid">UPI link</option></select>
     </div>
     <div id="orders-list"></div>`;
 
@@ -367,17 +379,17 @@ async function viewOrders(view, params) {
   };
   const load = async () => {
     $$("[data-status]").forEach((c) => c.classList.toggle("active", c.dataset.status === state.status));
-    const { data, count, error } = await build("id,created_at,customer_name,customer_phone,total,payment,status,source,order_items(qty)").range(0, state.limit - 1);
+    const { data, count, error } = await build("id,created_at,customer_name,customer_phone,total,payment,payment_status,status,source,order_items(qty)").range(0, state.limit - 1);
     if (error) return fail(error, "Loading orders");
     $("#orders-list").innerHTML = data.length ? `
       <div class="table-wrap"><table class="data"><thead><tr><th>Order</th><th class="hide-sm">Date</th><th>Customer</th><th class="num hide-sm">Items</th><th class="num">Total</th><th class="hide-sm">Payment</th><th>Status</th></tr></thead>
       <tbody>${data.map((o) => `<tr class="click" data-go="#/orders/${encodeURIComponent(o.id)}">
-        <td><b>${esc(o.id)}</b>${o.source === "quick" ? '<br><span class="muted-note">WhatsApp button</span>' : o.source === "admin" ? '<br><span class="muted-note">Added in admin</span>' : ""}</td>
+        <td><b>${esc(o.id)}</b>${o.source === "quick" ? '<br><span class="muted-note">WhatsApp button</span>' : o.source === "admin" ? '<br><span class="muted-note">Added in admin</span>' : o.source === "buy_now" ? '<br><span class="muted-note">Buy now</span>' : ""}</td>
         <td class="hide-sm">${fmtDate(o.created_at)}</td>
         <td>${esc(o.customer_name || "—")}<br><span class="muted-note">${esc(o.customer_phone || "")}</span></td>
         <td class="num hide-sm">${o.order_items.reduce((t, i) => t + i.qty, 0)}</td>
         <td class="num">${money(o.total)}</td>
-        <td class="hide-sm">${o.payment === "cod" ? "COD" : "Prepaid"}</td>
+        <td class="hide-sm">${payShort(o)}</td>
         <td>${pill(o.status)}</td></tr>`).join("")}</tbody></table></div>
       <p class="muted-note" style="margin-top:10px">Showing ${data.length} of ${count}</p>
       ${count > data.length ? '<button class="btn btn-ghost btn-sm load-more" id="more">Load more</button>' : ""}`
@@ -458,7 +470,7 @@ async function viewOrder(view, id) {
   view.innerHTML = `
     <p style="margin-bottom:10px"><a class="link-btn" href="#/orders">← All orders</a></p>
     <div class="page-head"><div><h1>${esc(o.id)} ${pill(o.status)}</h1><p class="muted-note">${fmtDate(o.created_at)} · ${esc(SOURCE[o.source] || o.source)}</p></div>
-      <div class="actions">${["new", "cancelled"].includes(o.status) ? '<button class="btn btn-danger btn-sm" id="delete">Delete order</button>' : ""}</div></div>
+      <div class="actions">${["new", "cancelled", "awaiting_payment"].includes(o.status) && o.payment_status !== "paid" ? '<button class="btn btn-danger btn-sm" id="delete">Delete order</button>' : ""}</div></div>
     <div class="order-grid">
       <div>
         <div class="panel"><h2>Items</h2>
@@ -473,11 +485,12 @@ async function viewOrder(view, id) {
           <div class="form-grid">
             <div class="field"><label>Name</label><input name="customer_name" value="${esc(o.customer_name)}"></div>
             <div class="field"><label>Phone</label><input name="customer_phone" value="${esc(o.customer_phone)}" inputmode="tel"></div>
+            <div class="field full"><label>Email (for order updates)</label><input name="email" type="email" value="${esc(o.email || "")}"></div>
             <div class="field full"><label>Address</label><textarea name="address">${esc(o.address)}</textarea></div>
             <div class="field"><label>City</label><input name="city" value="${esc(o.city || "")}"></div>
             <div class="field"><label>State</label><input name="state" value="${esc(o.state || "")}"></div>
             <div class="field"><label>Pincode</label><input name="pincode" value="${esc(o.pincode)}" inputmode="numeric"></div>
-            <div class="field"><label>Payment</label><select name="payment"><option value="prepaid" ${o.payment === "prepaid" ? "selected" : ""}>Prepaid</option><option value="cod" ${o.payment === "cod" ? "selected" : ""}>Cash on delivery</option></select></div>
+            <div class="field"><label>Payment</label><select name="payment" ${o.payment === "online" ? "disabled" : ""}><option value="prepaid" ${o.payment === "prepaid" ? "selected" : ""}>UPI / payment link</option><option value="cod" ${o.payment === "cod" ? "selected" : ""}>Cash on delivery</option>${o.payment === "online" ? '<option value="online" selected>Online (Razorpay)</option>' : ""}</select></div>
             <div class="field full"><label>Customer note</label><input name="note" value="${esc(o.note)}"></div>
             <div class="field"><label>Courier</label><input name="courier" value="${esc(o.courier)}" placeholder="e.g. Delhivery"></div>
             <div class="field"><label>Tracking number / link</label><input name="tracking" value="${esc(o.tracking)}"></div>
@@ -487,9 +500,19 @@ async function viewOrder(view, id) {
         </form>
       </div>
       <div>
+        <div class="panel"><h2>Payment</h2>
+          <ul class="list-plain">
+            <li><span>Method</span><b>${esc(PAYMENT[o.payment] || o.payment)}</b></li>
+            ${o.payment === "online" ? `<li><span>Status</span><b class="${o.payment_status === "paid" ? "" : "warn"}">${o.payment_status === "paid" ? "✓ Paid" : o.payment_status === "failed" ? "Failed / not completed" : "Waiting for payment"}</b></li>
+            ${o.paid_at ? `<li><span>Paid at</span><span>${fmtDate(o.paid_at)}</span></li>` : ""}
+            ${o.razorpay_payment_id ? `<li><span>Razorpay payment</span><a class="link-btn" target="_blank" rel="noopener" href="https://dashboard.razorpay.com/app/payments/${esc(o.razorpay_payment_id)}">${esc(o.razorpay_payment_id)}</a></li>` : ""}
+            ${o.razorpay_order_id ? `<li><span>Razorpay order</span><span class="muted-note">${esc(o.razorpay_order_id)}</span></li>` : ""}` : ""}
+          </ul>
+        </div>
         <div class="panel"><h2>Status</h2>
-          <div class="status-steps">${STATUSES.map(([sid, l]) => `<button type="button" data-set-status="${sid}" class="${sid === o.status ? "current" : ""}">${l}</button>`).join("")}</div>
-          <p class="muted-note">Moving to <b>Confirmed</b> (or later) takes the items out of stock. <b>Cancelled</b> or <b>Returned</b> puts them back.</p>
+          <div class="status-steps">${STATUSES.filter(([sid]) => sid !== "awaiting_payment" || o.status === "awaiting_payment").map(([sid, l]) => `<button type="button" data-set-status="${sid}" class="${sid === o.status ? "current" : ""}">${l}</button>`).join("")}</div>
+          <p class="muted-note">Moving to <b>Confirmed</b> (or later) takes the items out of stock. <b>Cancelled</b> or <b>Returned</b> puts them back.${o.email ? " The customer gets an email for Confirmed, Paid, Shipped, Delivered and Cancelled." : ""}</p>
+          ${o.email ? '<button type="button" class="link-btn" id="resend-email" style="margin-top:8px">Resend email for current status</button>' : ""}
         </div>
         <div class="panel"><h2>Message the customer</h2>
           ${o.customer_phone ? `<div class="wa-actions">${waTemplates(o).map(([label, , text]) => `<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener" href="${esc(waLink(o.customer_phone, text))}">💬 ${esc(label)}</a>`).join("")}</div><p class="muted-note" style="margin-top:10px">Opens WhatsApp with the message ready; check it before sending.</p>` : '<p class="muted-note">No phone number yet. This order came from the “Order on WhatsApp” button, so find the chat in WhatsApp using the order ID, then add the customer\'s details here.</p>'}
@@ -503,6 +526,7 @@ async function viewOrder(view, id) {
   $("#order-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const d = Object.fromEntries(new FormData(e.target));
+    if (d.email) d.email = d.email.trim().toLowerCase();
     await q(sb.from("orders").update(d).eq("id", id), "Saving");
     toast("Saved");
     route();
@@ -514,8 +538,10 @@ async function viewOrder(view, id) {
     await q(sb.from("orders").update({ status: to }).eq("id", id), "Updating status");
     toast(`Marked ${statusLabel(to)}`);
     refreshNewCount();
+    if (o.email) await notifyCustomer(id);
     route();
   }));
+  $("#resend-email")?.addEventListener("click", () => notifyCustomer(id, { force: true }));
   $("#delete")?.addEventListener("click", async () => {
     if (!confirm(`Delete order ${o.id} permanently? Use this only for test or spam orders.`)) return;
     await q(sb.from("orders").delete().eq("id", id), "Deleting");

@@ -138,6 +138,7 @@
             <div>${logo}<p class="muted" style="max-width:320px">${esc(S.tagline)} Soft, sturdy clothes for comfort, play and cuddles.</p></div>
             <div><h5>Shop</h5><ul>${CATS.map((c) => `<li><a href="shop.html?cat=${c.id}">${esc(c.label)}</a></li>`).join("")}</ul></div>
             <div><h5>Help</h5><ul>
+              <li><a href="track.html">Track your order</a></li>
               <li><a href="contact.html">Contact us</a></li>
               <li><a href="shipping.html">Shipping</a></li>
               <li><a href="returns.html">Returns & exchange</a></li>
@@ -158,39 +159,18 @@
         <div class="ship-bar"></div>
         <div class="drawer-body">
           <div class="lines"></div>
-          <form class="checkout-form" novalidate>
-            <a href="#" class="back-link" data-back>← Back to bag</a>
-            <h4 style="font-size:22px;margin-bottom:6px">Delivery details</h4>
-            <p class="muted" style="font-size:14px;margin-bottom:18px">We'll confirm your order, payment and delivery on WhatsApp.</p>
-            <div class="field"><label for="c-name">Full name</label><input id="c-name" name="name" required autocomplete="name"></div>
-            <div class="field"><label for="c-phone">Phone</label><input id="c-phone" name="phone" type="tel" required autocomplete="tel"></div>
-            <div class="field"><label for="c-addr">Address</label><textarea id="c-addr" name="address" required autocomplete="street-address"></textarea></div>
-            <div class="field-row">
-              <div class="field"><label for="c-city">City</label><input id="c-city" name="city" required autocomplete="address-level2"></div>
-              <div class="field"><label for="c-pin">Pincode</label><input id="c-pin" name="pincode" required inputmode="numeric" maxlength="6" autocomplete="postal-code"></div>
-            </div>
-            <div class="field"><label for="c-state">State</label><input id="c-state" name="state" required autocomplete="address-level1" list="in-states"><datalist id="in-states">${["Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat","Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura","Uttar Pradesh","Uttarakhand","West Bengal","Andaman and Nicobar Islands","Chandigarh","Dadra and Nagar Haveli and Daman and Diu","Delhi","Jammu and Kashmir","Ladakh","Lakshadweep","Puducherry"].map((s) => `<option value="${s}">`).join("")}</datalist></div>
-            <div class="field"><label for="c-note">Note (optional)</label><input id="c-note" name="note" placeholder="Gift wrap, preferred delivery time…"></div>
-            <div class="hp" aria-hidden="true"><label>Website<input name="website" tabindex="-1" autocomplete="off"></label></div>
-            <div class="field"><label>Payment</label>
-              <label class="pay-opt"><input type="radio" name="pay" value="prepaid" checked><span><b>Pay online (UPI / card)</b><small>We'll send a secure payment link on WhatsApp</small></span></label>
-              <label class="pay-opt" data-cod-opt><input type="radio" name="pay" value="cod"><span><b>Cash on delivery</b><small data-cod-note></small></span></label>
-            </div>
-            <p class="muted" style="font-size:13px">By placing an order you agree to our <a href="terms.html" style="text-decoration:underline">Terms</a> and <a href="returns.html" style="text-decoration:underline">Returns policy</a>.</p>
-          </form>
         </div>
         <div class="drawer-foot"></div>
       </aside>
       <div class="toast" role="status"></div>`);
 
     const drawer = $(".drawer"), overlay = $(".overlay"), mnav = $(".mobile-nav");
-    const close = () => { drawer.classList.remove("open", "checkout"); mnav.classList.remove("open"); overlay.classList.remove("open"); drawer.setAttribute("aria-hidden", "true"); };
+    const close = () => { drawer.classList.remove("open"); mnav.classList.remove("open"); overlay.classList.remove("open"); drawer.setAttribute("aria-hidden", "true"); };
     document.addEventListener("click", (e) => {
       if (e.target.closest("[data-open-bag]")) { e.preventDefault(); drawer.classList.add("open"); overlay.classList.add("open"); drawer.setAttribute("aria-hidden", "false"); }
       if (e.target.closest("[data-open-menu]")) { mnav.classList.add("open"); overlay.classList.add("open"); }
       if (e.target.closest("[data-close]")) close();
       if (e.target.closest(".mobile-nav a")) close();
-      if (e.target.closest("[data-back]")) { e.preventDefault(); drawer.classList.remove("checkout"); renderBag(); }
     });
     document.addEventListener("keydown", (e) => e.key === "Escape" && close());
     renderBag();
@@ -222,39 +202,25 @@
         }).join("")
       : `<div class="drawer-empty"><div class="ic">🧸</div><h4>Your bag is empty</h4><p>Let's find something snuggly.</p><a class="btn btn-primary" href="shop.html">Start shopping</a></div>`;
 
-    // COD availability depends on the bag total.
-    const codOpt = $("[data-cod-opt]");
-    codOpt.style.display = S.cod.enabled ? "" : "none";
-    const codInput = $("input[value=cod]", codOpt);
-    codInput.disabled = !codAllowed();
-    if (codInput.disabled && codInput.checked) $("input[value=prepaid]").checked = true;
-    $("[data-cod-note]").textContent = codAllowed()
-      ? (S.cod.fee ? `${money(S.cod.fee)} COD handling fee` : "No extra fee")
-      : `Available on orders of ${money(S.cod.minOrder)} or more`;
 
-    const inCheckout = drawer.classList.contains("checkout");
     const t = totals();
     $(".drawer-foot").style.display = count ? "" : "none";
     $(".drawer-foot").innerHTML = `
       <div class="sum"><span>Subtotal</span><span>${money(t.sub)}</span></div>
       <div class="sum"><span>Shipping</span><span>${t.ship ? money(t.ship) : "Free"}</span></div>
-      ${t.cod ? `<div class="sum"><span>COD fee</span><span>${money(t.cod)}</span></div>` : ""}
       <div class="row"><span>Total</span><span>${money(t.total)}</span></div>
-      <small>Inclusive of all taxes</small>
-      ${inCheckout
-        ? `<button class="btn btn-whatsapp btn-block" data-send>${ICON.wa} Place order on WhatsApp</button>`
-        : `<button class="btn btn-primary btn-block" data-checkout>Checkout · ${money(t.total)}</button>`}`;
+      <small>Inclusive of all taxes · COD fee, if any, added at checkout</small>
+      <a class="btn btn-primary btn-block" href="checkout.html">Checkout · ${money(t.total)}</a>`;
   }
 
-  const payMethod = () => ($(".checkout-form input[name=pay]:checked") || {}).value || "prepaid";
-  const codAllowed = () => S.cod.enabled && bagTotal() >= S.cod.minOrder;
-  function totals() {
-    const sub = bagTotal();
+  // Totals for a list of lines [{id, qty}]; COD fee only when paying cash on delivery.
+  function totalsFor(lines, payment) {
+    const sub = lines.reduce((t, l) => t + byId(l.id).price * l.qty, 0);
     const ship = !sub || sub >= S.freeShippingAbove ? 0 : S.shippingFee;
-    const cod = payMethod() === "cod" && codAllowed() ? S.cod.fee : 0;
+    const cod = payment === "cod" && S.cod.enabled && sub >= S.cod.minOrder ? S.cod.fee : 0;
     return { sub, ship, cod, total: sub + ship + cod };
   }
-  document.addEventListener("change", (e) => { if (e.target.name === "pay") renderBag(); });
+  const totals = () => totalsFor(bag);
 
   // Local order reference, used only if the order can't be saved online.
   function localOrderId() {
@@ -271,7 +237,10 @@
   async function saveOrder(payload) {
     if (CATALOG.offline) return null;
     try {
-      const r = await fetch("api/orders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      const headers = { "Content-Type": "application/json" };
+      const token = window.WynAuth && (await window.WynAuth.token());
+      if (token) headers.Authorization = `Bearer ${token}`;
+      const r = await fetch("api/orders", { method: "POST", headers, body: JSON.stringify(payload) });
       const data = await r.json().catch(() => ({}));
       if (r.ok) return data;
       if (r.status === 400 || r.status === 409) return { rejected: data.error || "Please check your bag and try again" };
@@ -293,70 +262,14 @@
   }
 
   document.addEventListener("click", (e) => {
-    const t = e.target.closest("[data-inc],[data-dec],[data-rm],[data-checkout],[data-send]");
+    const t = e.target.closest("[data-inc],[data-dec],[data-rm]");
     if (!t) return;
     if (t.dataset.inc) { const l = bag[t.dataset.inc]; const left = stockOf(byId(l.id), l.colour, l.size); if (left !== undefined && l.qty >= left) { toast(`Only ${left} left in ${l.size}`); return; } l.qty++; }
     if (t.dataset.dec) { const l = bag[t.dataset.dec]; l.qty > 1 ? l.qty-- : bag.splice(t.dataset.dec, 1); }
     if (t.dataset.rm) bag.splice(t.dataset.rm, 1);
-    if ("checkout" in t.dataset) { $(".drawer").classList.add("checkout"); renderBag(); $("#c-name").focus(); return; }
-    if ("send" in t.dataset) return sendOrder(t);
     save();
   });
 
-  async function sendOrder(btn) {
-    const f = $(".checkout-form");
-    const d = Object.fromEntries(new FormData(f));
-    const missing = ["name", "phone", "address", "city", "pincode", "state"].find((k) => !String(d[k] || "").trim());
-    if (missing) { f.elements[missing].focus(); f.elements[missing].style.borderColor = "var(--terracotta)"; toast("Please fill in all delivery details"); return; }
-    if (!/^\d{6}$/.test(String(d.pincode).trim())) { f.elements.pincode.focus(); f.elements.pincode.style.borderColor = "var(--terracotta)"; toast("Please enter a 6-digit pincode"); return; }
-
-    const w = openPending();
-    btn.disabled = true; btn.textContent = "Placing your order…";
-    const saved = await saveOrder({
-      source: "bag",
-      items: bag.map((l) => ({ id: l.id, colour: l.colour, size: l.size, qty: l.qty })),
-      customer: { name: d.name, phone: d.phone, address: d.address, city: d.city, state: d.state, pincode: String(d.pincode).trim(), note: d.note },
-      payment: payMethod(),
-      website: d.website,
-    });
-    if (saved && saved.rejected) {
-      if (w) w.close();
-      refreshCatalog();
-      toast(saved.rejected);
-      renderBag();
-      return;
-    }
-
-    // Use the server's prices and ID when saved; otherwise the local ones.
-    const t = saved ? { sub: saved.subtotal, ship: saved.shipping, cod: saved.cod_fee, total: saved.total } : totals();
-    const id = saved ? saved.id : localOrderId();
-    const items = saved
-      ? saved.lines.map((l) => ({ name: l.name, colour: l.colour_label, size: l.size, qty: l.qty, amount: l.unit_price * l.qty }))
-      : bag.map((l) => { const p = byId(l.id); return { name: p.name, colour: colourOf(p, l.colour).label, size: l.size, qty: l.qty, amount: p.price * l.qty }; });
-    const pay = saved ? saved.payment : payMethod();
-    const msg = [
-      `Hi ${S.name}! I'd like to place an order 🛍️`,
-      `Order ID: ${id}`, "",
-      ...items.map((l, i) => `${i + 1}. ${l.name}\n   Colour: ${l.colour} · Size: ${l.size} · Qty: ${l.qty} · ${money(l.amount)}`), "",
-      `Subtotal: ${money(t.sub)}`,
-      `Shipping: ${t.ship ? money(t.ship) : "Free"}`,
-      t.cod ? `COD fee: ${money(t.cod)}` : null,
-      `Total: ${money(t.total)}`,
-      `Payment: ${pay === "cod" ? "Cash on delivery" : "Pay online (please send payment link)"}`, "",
-      `Name: ${d.name}`, `Phone: ${d.phone}`, `Address: ${[d.address, d.city, d.state].filter(Boolean).join(", ")} – ${d.pincode}`,
-      d.note ? `Note: ${d.note}` : null,
-    ].filter((x) => x !== null).join("\n");
-    const url = `https://wa.me/${S.whatsapp}?text=${encodeURIComponent(msg)}`;
-    goWhatsApp(w, url);
-
-    // Show a confirmation with a retry link, then empty the bag.
-    bag = []; save();
-    $(".drawer").classList.remove("checkout");
-    $(".ship-bar").style.display = "none";
-    $(".lines").innerHTML = `<div class="drawer-empty"><div class="ic">💌</div><h4>Almost done!</h4>
-      <p>Your order <b>${esc(id)}</b> is ready in WhatsApp. Just press <b>Send</b> there and we'll confirm it shortly.</p>
-      <a class="btn btn-whatsapp" href="${url}" target="_blank" rel="noopener">${ICON.wa} WhatsApp didn't open? Tap here</a></div>`;
-  }
 
   let toastTimer;
   function toast(text) {
@@ -492,9 +405,10 @@
             <div class="sizes"></div><p class="low-stock" id="low-stock"></p></div>
           <div class="buy-row">
             <div class="qty"><button data-q="-1" aria-label="Decrease">−</button><span id="qty">1</span><button data-q="1" aria-label="Increase">+</button></div>
-            <button class="btn btn-primary" id="add">Add to bag</button>
+            <button class="btn btn-ghost" id="add">Add to bag</button>
           </div>
-          <button class="btn btn-whatsapp btn-block" id="wa">${ICON.wa} Order on WhatsApp</button>
+          <button class="btn btn-accent btn-block" id="buy">Buy now</button>
+          <button class="btn btn-whatsapp btn-block wa-alt" id="wa">${ICON.wa} Order on WhatsApp</button>
           <div class="mini-trust"><div><b>🌿</b>Gentle fabrics</div><div><b>🚚</b>Fast delivery</div><div><b>↺</b>Easy exchange</div></div>
           <div class="perks">
             <details open><summary>Description</summary><p>${esc(p.description)}</p>${p.fabric ? `<p><strong>Fabric:</strong> ${esc(p.fabric)}</p>` : ""}</details>
@@ -516,7 +430,7 @@
       const left = size ? stockOf(p, colour, size) : undefined;
       $("#low-stock").textContent = left !== undefined && left > 0 && left <= 3 ? `Only ${left} left in ${size}` : "";
       const out = colourSoldOut(p, colour);
-      $("#add").disabled = out; $("#wa").disabled = out;
+      $("#add").disabled = out; $("#wa").disabled = out; $("#buy").disabled = out;
       $("#add").textContent = out ? "Sold out" : "Add to bag";
     };
     const drawGallery = () => {
@@ -551,6 +465,7 @@
 
     const needSize = () => { if (size) return false; toast("Please choose a size"); $("#sizes").scrollIntoView({ behavior: "smooth", block: "center" }); return true; };
     $("#add").addEventListener("click", () => { if (!needSize()) addToBag(p.id, colour, size, qty); });
+    $("#buy").addEventListener("click", () => { if (!needSize()) location.href = `checkout.html?buy=${encodeURIComponent([p.id, colour, size, qty].join("|"))}`; });
     $("#wa").addEventListener("click", async () => {
       if (needSize()) return;
       const w = openPending();
@@ -585,9 +500,16 @@
   }
 
   // ---------- boot ----------
+  // Shared helpers for page scripts in js/*.js (they register in window.WynPages).
+  const W = {
+    S, CATS, PRODUCTS, CATALOG, ICON, $, $$, esc, img, money, byId, colourOf, imgs, stockOf, sizeSoldOut, colourSoldOut,
+    card, reveal, toast, totalsFor, saveOrder, openPending, goWhatsApp, localOrderId, refreshCatalog,
+    get bag() { return bag; }, setBag(b) { bag = b; save(); }, renderBag,
+  };
+  window.Wyn = W;
   chrome();
-  const pages = { home, shop, product, info: () => {} };
-  (pages[document.body.dataset.page] || (() => {}))();
+  const pages = { home, shop, product, info: () => {}, ...(window.WynPages || {}) };
+  await (pages[document.body.dataset.page] || (() => {}))(W);
   fillConfig();
   reveal();
 })();

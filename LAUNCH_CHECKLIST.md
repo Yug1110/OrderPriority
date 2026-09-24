@@ -73,7 +73,10 @@ All of these go in `config.js` except prices, which live in `data/products.js`.
 | ✅ | **Every order saved automatically** (in the admin database) when the checkout is submitted, even if the shopper never presses Send in WhatsApp; prices are checked on the server *(live)* |
 | ✅ | Stock per size and colour, with sold-out and "only N left" on the shop and low-stock alerts in the admin *(live)* |
 | ⬜ | Custom domain (e.g. wynoak.in / wynoak.com; check availability) and business email on it |
-| ⬜ | On-site Razorpay checkout (pay on the site instead of by link), once order volume justifies it |
+| ✅ | **Checkout page** with **Buy now**, **online payment (Razorpay)**, COD and WhatsApp; order confirmation page; **order tracking** by order ID + phone; **order emails**. **Owner to do:** Razorpay test keys + Gmail app password → `docs/PAYMENTS_EMAIL_SETUP.md` |
+| ⬜ | Phase 2: customer login (Google + phone OTP), My account & orders, saved addresses, wishlist |
+| ⬜ | Phase 3: smart search + similar products, reviews & ratings, GST invoices, back-in-stock alerts |
+| ⬜ | Razorpay **live** keys (after KYC, which needs the business details) |
 | ⬜ | Coupon codes (first-order discount, influencer codes) |
 | ⬜ | Reviews on product pages |
 | ⬜ | Search (useful beyond about 30 products) |
@@ -103,6 +106,7 @@ Investors will ask for numbers, so the analytics and order log in sections 3 and
 
 - 2026-09-24: Storefront built and deployed (home, shop, product, bag, WhatsApp checkout); photos optimised from 1.3 GB to 17 MB.
 - 2026-09-24: Moved hosting to Vercel after the Google Safe Browsing flag on the github.io address.
+- 2026-09-24: Phase 1 shipped: checkout page, Buy now, Razorpay (test-ready), order confirmation, tracking, order emails, admin payment panel and status emails. Tested locally with a fake Razorpay server and mail catcher.
 - 2026-09-24: Admin connected to the live Supabase project; catalogue imported; live order save tested and removed.
 - 2026-09-24: Built the admin dashboard (Supabase + Vercel functions): products, photo upload, stock per size, automatic order saving with server-checked prices, order statuses with a stock trigger, WhatsApp templates, Shiprocket CSV, sales dashboard, settings, team links. Checkout now asks for city and state. Tested locally end to end.
 - 2026-09-24: Checked domain availability and the name; wrote the policy review sheet and the legal-setup and admin-dashboard plans; softened site-wide fabric claims; home-page delivery and exchange values now come from config; internal docs kept off the live site.

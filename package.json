@@ -1,0 +1,9 @@
+{
+  "name": "wynoak",
+  "private": true,
+  "description": "Wynoak storefront, admin and API functions (no build step)",
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "nodemailer": "^6.9.16"
+  }
+}

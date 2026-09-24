@@ -24,8 +24,9 @@ module.exports = async (req, res) => {
       (p.stock[s.colour_key] = p.stock[s.colour_key] || {})[s.size] = s.qty;
     }
 
+    const rzp = require("./_razorpay");
     send(res, 200, {
-      settings,
+      settings: { ...settings, onlinePayments: rzp.enabled(), razorpayKey: rzp.enabled() ? rzp.KEY_ID : "" },
       categories,
       products: Object.values(byProduct).filter((p) => p.colours.length),
     }, {
